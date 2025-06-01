@@ -1,0 +1,84 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, accuracy_score
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+# Load your dataset
+data = pd.read_csv('social_media_profiles.csv')
+
+# Preprocess your data
+# Assuming 'features' are the columns you want to use for prediction
+# and 'label' is the column indicating whether the profile is fake (1) or real (0)
+X = data[['feature1', 'feature2', 'feature3', 'feature4']]
+y = data['label']
+
+# Feature extraction for text data (if applicable)
+# Assuming 'feature1' contains text data
+vectorizer = TfidfVectorizer(max_features=500)
+X_text = vectorizer.fit_transform(X['feature1']).toarray()
+
+# Combine text features with other features
+X_combined = pd.concat([pd.DataFrame(X_text), X[['feature2', 'feature3', 'feature4']].reset_index(drop=True)], axis=1)
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X_combined, y, test_size=0.3, random_state=42)
+
+# Initialize the model
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+
+# Train the model
+model.fit(X_train, y_train)
+
+# Make predictions
+y_pred = model.predict(X_test)
+
+# Evaluate the model
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print(classification_report(y_test, y_pred))
+
+# Function to detect fake profiles
+def detect_fake_profile(profile_data):
+    # Preprocess and extract features from the input profile data
+    profile_text = vectorizer.transform([profile_data['feature1']]).toarray()
+    profile_features = pd.concat([pd.DataFrame(profile_text), pd.DataFrame([profile_data[['feature2', 'feature3', 'feature4']].values])], axis=1)
+
+    # Make prediction
+    prediction = model.predict(profile_features)
+    return prediction[0]
+
+# Example usage
+new_profile = {'feature1': 'example bio text', 'feature2': 0.8, 'feature3': 2.1, 'feature4': 5.3}
+is_fake = detect_fake_profile(new_profile)
+print("Fake Profile Detected:" if is_fake else "Profile is Real")
+
+
+
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+
+# Sample data
+data = {
+    'feature1': [1, 2, 3, 4, 5],
+    'feature2': [10, 20, 30, 40, 50],
+    'label': [0, 1, 0, 1, 0]
+}
+
+# Convert to DataFrame
+df = pd.DataFrame(data)
+
+# Separate features and labels
+X = df[['feature1', 'feature2']]
+y = df['label']
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Print the results
+print("X_train:\n", X_train)
+print("X_test:\n", X_test)
+print("y_train:\n", y_train)
+print("y_test:\n", y_test)
+
+
