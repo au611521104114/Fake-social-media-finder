@@ -1,1 +1,1 @@
-# Fake-social-media-finder
+# Fake-social-media-account-finder
